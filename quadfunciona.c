@@ -7,8 +7,8 @@
 #else
 #include <GL/gl.h> /* OpenGL functions */
 #endif
-
 #include <math.h>
+
 unsigned int first = 1;
 char desenhaBorda = 1;
 
@@ -25,77 +25,75 @@ QuadNode *newNode(int x, int y, int width, int height)
     return n;
 }
 
-QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float minDetail){
-    QuadNode *novaRaiz = newNode(x,y,width,height);
+QuadNode *fillNode(Img *pic, int x, int y, int width, int height, float minDetail)
+{
+    QuadNode *raiz = newNode(x, y, width, height);
 
     RGB(*pixels)
     [pic->width] = (RGB(*)[pic->width])pic->img;
 
-    int rMedio, gMedio, bMedio, difPixelMedio = 0;
-    /*
-        calcular a cor media da regiao (rgb medio / height * width) 
-    */
+    int rMediano, gMediano, bMediano, difMediaTodosPixels = 0;
+    //gera a diferenca mediana dos pixels
 
-    //calcula o rgb medio
     for (int i = y; i < y + height; i++)
     {
         for (int j = x; j < x + width; j++)
         {
-            rMedio += pixels[i][j].r;
-            gMedio += pixels[i][j].g;
-            bMedio += pixels[i][j].b;
+            rMediano += pixels[i][j].r;
+            gMediano += pixels[i][j].g;
+            bMediano += pixels[i][j].b;
         }
     }
-    //verifica se a altura * largura eh diferente de zero para calcular a media
-    if(height * width != 0){
-        rMedio = rMedio / (height * width);
-        gMedio = gMedio / (height * width);
-        bMedio = bMedio / (height * width);
+
+    if ((width * height) != 0)
+    {
+        rMediano = rMediano / (width * height);
+        gMediano = gMediano / (width * height);
+        bMediano = bMediano / (width * height);
     }
 
-    
-    //usar formula disponivel no moodle para todos os pixels
     for (int i = y; i < y + height; i++)
     {
         for (int j = x; j < x + width; j++)
         {
-            difPixelMedio += sqrt(pow((pixels[i][j].r - rMedio), 2) + pow((pixels[i][j].g - gMedio), 2) + pow((pixels[i][j].b - bMedio), 2));
+            difMediaTodosPixels += sqrt(pow((pixels[i][j].r - rMediano), 2) + pow((pixels[i][j].g - gMediano), 2) + pow((pixels[i][j].b - bMediano), 2));
         }
     }
 
-    if(height * width != 0){
-        difPixelMedio = difPixelMedio / (height * width);
-    }
-    
-    novaRaiz->color[0] = rMedio;
-    novaRaiz->color[1] = gMedio;
-    novaRaiz->color[2] = bMedio;
+    if ((width * height) != 0)
+        difMediaTodosPixels = difMediaTodosPixels / (width * height);
 
-    //se diferenca media for maior do que o minDetail, chama recursivamente o geraNodoRecursivo
-    if (difPixelMedio > minDetail)
+    raiz->color[0] = rMediano;
+    raiz->color[1] = gMediano;
+    raiz->color[2] = bMediano;
+
+    if (difMediaTodosPixels > minDetail)
     {
-        novaRaiz->status = PARCIAL;
+        raiz->status = PARCIAL;
 
-        novaRaiz->NE = geraNodoRecursivo(x, y, width / 2, height / 2, pic, minDetail);
-        novaRaiz->NW = geraNodoRecursivo(x + (width / 2), y, width / 2, height / 2, pic, minDetail);
-        novaRaiz->SE = geraNodoRecursivo(x, y + (height / 2), width / 2, height / 2, pic, minDetail);
-        novaRaiz->SW = geraNodoRecursivo(x + (width / 2), y + (height / 2), width / 2, height / 2, pic, minDetail);
+        raiz->NE = fillNode(pic, x, y, width / 2, height / 2, minDetail);
+        raiz->NW = fillNode(pic, x + (width / 2), y, width / 2, height / 2, minDetail);
+        raiz->SE = fillNode(pic, x, y + (height / 2), width / 2, height / 2, minDetail);
+        raiz->SW = fillNode(pic, x + (width / 2), y + (height / 2), width / 2, height / 2, minDetail);
     }
     else
     {
-        novaRaiz->status = CHEIO;
+        raiz->status = CHEIO;
     }
-    return novaRaiz;
+
+    return raiz;
 }
 
 QuadNode *geraQuadtree(Img *pic, float minDetail)
 {
-
-
     int width = pic->width;
     int height = pic->height;
 
-    QuadNode *raiz = geraNodoRecursivo(0,0,width,height,pic, minDetail);
+    //////////////////////////////////////////////////////////////////////////
+    // Implemente aqui o algoritmo que gera a quadtree, retornando o nodo raiz
+    //////////////////////////////////////////////////////////////////////////
+
+    QuadNode *raiz = fillNode(pic, 0, 0, width, height, minDetail);
 
     return raiz;
 }
