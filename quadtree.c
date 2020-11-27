@@ -25,9 +25,13 @@ QuadNode *newNode(int x, int y, int width, int height)
     return n;
 }
 
-QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float minDetail){
-    QuadNode *novaRaiz = newNode(x,y,width,height);
+//ajeitar o nivel de detalhamento
+QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float minDetail, int nivelDetail){
 
+    QuadNode *novaRaiz = newNode(x,y,width,height);
+    if(nivelDetail > (int)minDetail){
+        return novaRaiz;
+    }
     RGB(*pixels)
     [pic->width] = (RGB(*)[pic->width])pic->img;
 
@@ -76,10 +80,10 @@ QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float
     {
         novaRaiz->status = PARCIAL;
 
-        novaRaiz->NE = geraNodoRecursivo(x, y, width / 2, height / 2, pic, minDetail);
-        novaRaiz->NW = geraNodoRecursivo(x + (width / 2), y, width / 2, height / 2, pic, minDetail);
-        novaRaiz->SE = geraNodoRecursivo(x, y + (height / 2), width / 2, height / 2, pic, minDetail);
-        novaRaiz->SW = geraNodoRecursivo(x + (width / 2), y + (height / 2), width / 2, height / 2, pic, minDetail);
+        novaRaiz->NE = geraNodoRecursivo(x, y, width / 2, height / 2, pic, minDetail, nivelDetail+1);
+        novaRaiz->NW = geraNodoRecursivo(x + (width / 2), y, width / 2, height / 2, pic, minDetail, nivelDetail+1);
+        novaRaiz->SE = geraNodoRecursivo(x, y + (height / 2), width / 2, height / 2, pic, minDetail, nivelDetail+1);
+        novaRaiz->SW = geraNodoRecursivo(x + (width / 2), y + (height / 2), width / 2, height / 2, pic, minDetail, nivelDetail+1);
     }
     else
     {
@@ -95,7 +99,7 @@ QuadNode *geraQuadtree(Img *pic, float minDetail)
     int width = pic->width;
     int height = pic->height;
 
-    QuadNode *raiz = geraNodoRecursivo(0,0,width,height,pic, minDetail);
+    QuadNode *raiz = geraNodoRecursivo(0,0,width,height,pic, minDetail, 0);
 
     return raiz;
 }
