@@ -25,13 +25,20 @@ QuadNode *newNode(int x, int y, int width, int height)
     return n;
 }
 
-//ajeitar o nivel de detalhamento
-QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float minDetail, int nivelDetail){
+/*      Description: vai gerando nodos recursivamente de acordo com nivel de detalhamento
+    *   Returns: QuadNode 
+    *   Parameters: x: ponto x do nodo, 
+    *               y: ponto y do nodo, 
+    *               width: largura do nodo, 
+    *               height: altura do nodo, 
+    *               minDetail: detalhe passado do usuario, 
+    *               nivelDetail: nivel do detalhamento atual 
+*/
+QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float minDetail)
+{
 
-    QuadNode *novaRaiz = newNode(x,y,width,height);
-    if(nivelDetail > (int)minDetail){
-        return novaRaiz;
-    }
+    QuadNode *novaRaiz = newNode(x, y, width, height);
+
     RGB(*pixels)
     [pic->width] = (RGB(*)[pic->width])pic->img;
 
@@ -40,7 +47,7 @@ QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float
         calcular a cor media da regiao (rgb medio / height * width) 
     */
 
-    //calcula o rgb medio
+    //soma os pixels em uma variavel
     for (int i = y; i < y + height; i++)
     {
         for (int j = x; j < x + width; j++)
@@ -50,14 +57,14 @@ QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float
             bMedio += pixels[i][j].b;
         }
     }
-    //verifica se a altura * largura eh diferente de zero para calcular a media
-    if(height * width != 0){
+    //faz a media dos pixels, verifica divisao por 0. se nao verificar da Floating point exception (core dumped)
+    if (height * width != 0)
+    {
         rMedio = rMedio / (height * width);
         gMedio = gMedio / (height * width);
         bMedio = bMedio / (height * width);
     }
 
-    
     //usar formula disponivel no moodle para todos os pixels
     for (int i = y; i < y + height; i++)
     {
@@ -67,10 +74,11 @@ QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float
         }
     }
 
-    if(height * width != 0){
+    if (height * width != 0)
+    {
         difPixelMedio = difPixelMedio / (height * width);
     }
-    
+
     novaRaiz->color[0] = rMedio;
     novaRaiz->color[1] = gMedio;
     novaRaiz->color[2] = bMedio;
@@ -80,10 +88,10 @@ QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float
     {
         novaRaiz->status = PARCIAL;
 
-        novaRaiz->NE = geraNodoRecursivo(x, y, width / 2, height / 2, pic, minDetail, nivelDetail+1);
-        novaRaiz->NW = geraNodoRecursivo(x + (width / 2), y, width / 2, height / 2, pic, minDetail, nivelDetail+1);
-        novaRaiz->SE = geraNodoRecursivo(x, y + (height / 2), width / 2, height / 2, pic, minDetail, nivelDetail+1);
-        novaRaiz->SW = geraNodoRecursivo(x + (width / 2), y + (height / 2), width / 2, height / 2, pic, minDetail, nivelDetail+1);
+        novaRaiz->NE = geraNodoRecursivo(x, y, width / 2, height / 2, pic, minDetail);
+        novaRaiz->NW = geraNodoRecursivo(x + (width / 2), y, width / 2, height / 2, pic, minDetail);
+        novaRaiz->SE = geraNodoRecursivo(x, y + (height / 2), width / 2, height / 2, pic, minDetail);
+        novaRaiz->SW = geraNodoRecursivo(x + (width / 2), y + (height / 2), width / 2, height / 2, pic, minDetail);
     }
     else
     {
@@ -95,11 +103,10 @@ QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float
 QuadNode *geraQuadtree(Img *pic, float minDetail)
 {
 
-
     int width = pic->width;
     int height = pic->height;
 
-    QuadNode *raiz = geraNodoRecursivo(0,0,width,height,pic, minDetail, 0);
+    QuadNode *raiz = geraNodoRecursivo(0, 0, width, height, pic, minDetail);
 
     return raiz;
 }

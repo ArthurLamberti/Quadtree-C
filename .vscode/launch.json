@@ -8,22 +8,27 @@
             "name": "Build and debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/loader",
-            "args": ["british_summer.jpg"],
+            /*"program": "${workspaceFolder}/quadtree.exe",*/
+            "args": [
+                "sigil.jpg"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "linux": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "/usr/bin/gdb"
+                "miDebuggerPath": "/usr/bin/gdb",
+                "program": "${workspaceFolder}/quadtree"
             },
             "osx": {
-                "MIMode": "lldb"
+                "MIMode": "lldb",
+                "program": "${workspaceFolder}/quadtree"
             },
             "windows": {
                 "MIMode": "gdb",
-                "miDebuggerPath": "gdb.exe"
+                "miDebuggerPath": "gdb.exe",
+                "program": "${workspaceFolder}/quadtree.exe"
             },
             "setupCommands": [
                 {
