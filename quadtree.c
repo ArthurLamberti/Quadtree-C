@@ -33,6 +33,7 @@ QuadNode *newNode(int x, int y, int width, int height)
     *               height: altura do nodo, 
     *               minDetail: detalhe passado do usuario, 
     *               nivelDetail: nivel do detalhamento atual 
+    * arredondar calculo para considerar todos os pixels
 */
 QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float minDetail)
 {
@@ -42,61 +43,70 @@ QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float
     RGB(*pixels)
     [pic->width] = (RGB(*)[pic->width])pic->img;
 
-    int rMedio, gMedio, bMedio, difPixelMedio = 0;
-    /*
-        calcular a cor media da regiao (rgb medio / height * width) 
-    */
-
-    //soma os pixels em uma variavel
-    for (int i = y; i < y + height; i++)
+    int rMedio, gMedio, bMedio, nivelDeDetalhe = 0;
+    int areaDaImagem = width * height;
+    printf("%d - ", areaDaImagem);
+    //deve somar todos os pixels da area
+    for (int i = y; i < height + y; i++)
     {
-        for (int j = x; j < x + width; j++)
+        for (int j = x; j < width + x; j++)
         {
             rMedio += pixels[i][j].r;
             gMedio += pixels[i][j].g;
             bMedio += pixels[i][j].b;
         }
     }
-    //faz a media dos pixels, verifica divisao por 0. se nao verificar da Floating point exception (core dumped)
-    if (height * width != 0)
-    {
-        rMedio = rMedio / (height * width);
-        gMedio = gMedio / (height * width);
-        bMedio = bMedio / (height * width);
-    }
 
-    //usar formula disponivel no moodle para todos os pixels
-    for (int i = y; i < y + height; i++)
-    {
-        for (int j = x; j < x + width; j++)
-        {
-            difPixelMedio += sqrt(pow((pixels[i][j].r - rMedio), 2) + pow((pixels[i][j].g - gMedio), 2) + pow((pixels[i][j].b - bMedio), 2));
-        }
-    }
+    //verifica pra nao dar divisao por 0 e faz o calculo do rbg medio
 
-    if (height * width != 0)
+    if (areaDaImagem != 0)
     {
-        difPixelMedio = difPixelMedio / (height * width);
+        rMedio = rMedio / areaDaImagem;
+        gMedio = gMedio / areaDaImagem;
+        bMedio = bMedio / areaDaImagem;
     }
-
+    //atribui a raiz a cor media
     novaRaiz->color[0] = rMedio;
     novaRaiz->color[1] = gMedio;
     novaRaiz->color[2] = bMedio;
 
-    //se diferenca media for maior do que o minDetail, chama recursivamente o geraNodoRecursivo
-    if (difPixelMedio > minDetail)
+    //usa formula pra calcular o nivel de detalhe
+    int rDistancia, gDistancia, bDistancia = 0;
+    for (int i = y; i < height + y; i++)
+    {
+        for (int j = x; j < width + x; j++)
+        {
+            //obtem as potencias internas do calculo
+            rDistancia = pow(pixels[i][j].r - rMedio, 2);
+            gDistancia = pow(pixels[i][j].g - gMedio, 2);
+            bDistancia = pow(pixels[i][j].b - bMedio, 2);
+
+            nivelDeDetalhe += sqrt(rDistancia + gDistancia + bDistancia);
+        }
+    }
+    //verifica se a area da imagem eh igual a zero pra nao dividir com erro
+    if (areaDaImagem != 0)
+    {
+        nivelDeDetalhe = nivelDeDetalhe / areaDaImagem;
+    }
+
+    //deve arredondar a imagem corretamente (se for numero impar, passar um pixel a mais na imagem da direita) // C arredonda para baixo
+    //deve chamar recursivamente a funcao para cada area
+    printf("\n%d  === %f\n", nivelDeDetalhe, minDetail);
+    if (nivelDeDetalhe >  minDetail)
     {
         novaRaiz->status = PARCIAL;
 
         novaRaiz->NE = geraNodoRecursivo(x, y, width / 2, height / 2, pic, minDetail);
         novaRaiz->NW = geraNodoRecursivo(x + (width / 2), y, width / 2, height / 2, pic, minDetail);
-        novaRaiz->SE = geraNodoRecursivo(x, y + (height / 2), width / 2, height / 2, pic, minDetail);
         novaRaiz->SW = geraNodoRecursivo(x + (width / 2), y + (height / 2), width / 2, height / 2, pic, minDetail);
+        novaRaiz->SE = geraNodoRecursivo(x, y + (height / 2), width / 2, height / 2, pic, minDetail);
     }
     else
     {
         novaRaiz->status = CHEIO;
     }
+
     return novaRaiz;
 }
 
@@ -105,7 +115,6 @@ QuadNode *geraQuadtree(Img *pic, float minDetail)
 
     int width = pic->width;
     int height = pic->height;
-
     QuadNode *raiz = geraNodoRecursivo(0, 0, width, height, pic, minDetail);
 
     return raiz;
@@ -185,28 +194,28 @@ void drawNode(QuadNode *n)
         glBegin(GL_QUADS);
         glColor3ubv(n->color);
         glVertex2f(n->x, n->y);
-        glVertex2f(n->x + n->width - 1, n->y);
-        glVertex2f(n->x + n->width - 1, n->y + n->height - 1);
-        glVertex2f(n->x, n->y + n->height - 1);
+        glVertex2f(n->x + n->width, n->y);
+        glVertex2f(n->x + n->width, n->y + n->height);
+        glVertex2f(n->x, n->y + n->height);
         glEnd();
     }
 
     else if (n->status == PARCIAL)
     {
-        if (desenhaBorda)
-        {
-            glBegin(GL_LINE_LOOP);
-            glColor3ubv(n->color);
-            glVertex2f(n->x, n->y);
-            glVertex2f(n->x + n->width - 1, n->y);
-            glVertex2f(n->x + n->width - 1, n->y + n->height - 1);
-            glVertex2f(n->x, n->y + n->height - 1);
-            glEnd();
-        }
         drawNode(n->NE);
         drawNode(n->NW);
         drawNode(n->SE);
         drawNode(n->SW);
+    }
+    if (desenhaBorda)
+    {
+        glBegin(GL_LINE_LOOP);
+        glColor3ub(0, 0, 0);
+        glVertex2f(n->x, n->y);
+        glVertex2f(n->x + n->width, n->y);
+        glVertex2f(n->x + n->width, n->y + n->height);
+        glVertex2f(n->x, n->y + n->height);
+        glEnd();
     }
     // Nodos vazios não precisam ser desenhados... nem armazenados!
 }
