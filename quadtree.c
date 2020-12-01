@@ -45,7 +45,7 @@ QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float
 
     int rMedio, gMedio, bMedio, nivelDeDetalhe = 0;
     int areaDaImagem = width * height;
-    printf("%d - ", areaDaImagem);
+    // printf("%d - ", areaDaImagem);
     //deve somar todos os pixels da area
     for (int i = y; i < height + y; i++)
     {
@@ -77,11 +77,11 @@ QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float
         for (int j = x; j < width + x; j++)
         {
             //obtem as potencias internas do calculo
-            rDistancia = pow(pixels[i][j].r - rMedio, 2);
-            gDistancia = pow(pixels[i][j].g - gMedio, 2);
-            bDistancia = pow(pixels[i][j].b - bMedio, 2);
-
-            nivelDeDetalhe += sqrt(rDistancia + gDistancia + bDistancia);
+            // rDistancia = pow((pixels[i][j].r - rMedio), 2);
+            // gDistancia = pow((pixels[i][j].g - gMedio), 2);
+            // bDistancia = pow((pixels[i][j].b - bMedio), 2);
+            // nivelDeDetalhe += sqrt(rDistancia + gDistancia + bDistancia);
+            nivelDeDetalhe += sqrt(pow((pixels[i][j].r - rMedio), 2) + pow((pixels[i][j].g - gMedio), 2) + pow((pixels[i][j].b - bMedio), 2));
         }
     }
     //verifica se a area da imagem eh igual a zero pra nao dividir com erro
@@ -92,15 +92,20 @@ QuadNode *geraNodoRecursivo(int x, int y, int width, int height, Img *pic, float
 
     //deve arredondar a imagem corretamente (se for numero impar, passar um pixel a mais na imagem da direita) // C arredonda para baixo
     //deve chamar recursivamente a funcao para cada area
-    printf("\n%d  === %f\n", nivelDeDetalhe, minDetail);
-    if (nivelDeDetalhe >  minDetail)
+    // printf("\n%d  === %f\n", nivelDeDetalhe, minDetail);
+    if (nivelDeDetalhe > minDetail)
     {
         novaRaiz->status = PARCIAL;
 
-        novaRaiz->NE = geraNodoRecursivo(x, y, width / 2, height / 2, pic, minDetail);
-        novaRaiz->NW = geraNodoRecursivo(x + (width / 2), y, width / 2, height / 2, pic, minDetail);
-        novaRaiz->SW = geraNodoRecursivo(x + (width / 2), y + (height / 2), width / 2, height / 2, pic, minDetail);
-        novaRaiz->SE = geraNodoRecursivo(x, y + (height / 2), width / 2, height / 2, pic, minDetail);
+        // novaRaiz->NE = geraNodoRecursivo(x, y, (int)round(width / 2), (int)round(height / 2), pic, minDetail);
+        // novaRaiz->NW = geraNodoRecursivo(x + (width / 2), y, (int)ceil(width / 2), (int)ceil(height / 2), pic, minDetail);
+        // novaRaiz->SW = geraNodoRecursivo(x + (width / 2), y + (height / 2), (int)ceil(width / 2), (int)ceil(height / 2), pic, minDetail);
+        // novaRaiz->SE = geraNodoRecursivo(x, y + (height / 2), (int)round(width / 2), (int)round(height / 2), pic, minDetail);
+
+        novaRaiz->NE = geraNodoRecursivo(x, y, round(width / 2), round(height / 2), pic, minDetail);
+        novaRaiz->NW = geraNodoRecursivo(x + (width / 2), y, round(width / 2), round(height / 2), pic, minDetail);
+        novaRaiz->SW = geraNodoRecursivo(x + (width / 2), y + (height / 2), round(width / 2), round(height / 2), pic, minDetail);
+        novaRaiz->SE = geraNodoRecursivo(x, y + (height / 2), round(width / 2), round(height / 2), pic, minDetail);
     }
     else
     {
