@@ -45,6 +45,9 @@ QuadNode *newNodeRecursive(Img *pic, int x, int y, double width, double height, 
         rMedio = rMedio / (width * height);
         gMedio = gMedio / (width * height);
         bMedio = bMedio / (width * height);
+        novaRaiz->color[0] = rMedio;
+        novaRaiz->color[1] = gMedio;
+        novaRaiz->color[2] = bMedio;
     }
 
     //usa formula pra calcular o nivel de detalhe
@@ -65,10 +68,6 @@ QuadNode *newNodeRecursive(Img *pic, int x, int y, double width, double height, 
     {
         diferencaMedia = diferencaMedia / (width * height);
     }
-
-    novaRaiz->color[0] = rMedio;
-    novaRaiz->color[1] = gMedio;
-    novaRaiz->color[2] = bMedio;
 
     if (diferencaMedia > minDetail)
     {
