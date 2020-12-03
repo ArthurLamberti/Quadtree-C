@@ -32,7 +32,7 @@ GLuint tex;
 QuadNode *raiz;
 Img pic;
 
-int detalhe = 2; // nível de detalhe inicial
+int detalhe = 30; // nível de detalhe inicial
 
 int main(int argc, char **argv)
 {
